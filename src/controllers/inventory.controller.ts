@@ -1,4 +1,7 @@
 import express from "express";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import type { Request, Response } from "express";
 
 import fs from "fs/promises";
@@ -32,6 +35,13 @@ async function writeData(data: Inventory[]) {
 export async function createInventory(req: Request, res: Response) {
   const { name, description, category, stock } = req.body as any;
 
+  if (!name || !description || !category) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  if (stock < 0) {
+    return res.status(400).json({ message: "Stock cannot be negative" });
+  }
   const inventories = await readData();
 
   const newId =
@@ -57,4 +67,94 @@ export async function createInventory(req: Request, res: Response) {
     data: newItem,
   });
 }
-/* --------------------------------- GET ALL -------------------------------- */
+
+/* ---------------------------- get all invetory ---------------------------- */
+
+export const getAllInventory = async (req: Request, res: Response) => {
+  const { search, category } = req.query;
+
+  let inventories = await readData();
+
+  inventories = inventories.filter((item) => item.deletedAt === null);
+
+  if (search) {
+    const keyword = (search as string).toLowerCase();
+
+    inventories = inventories.filter(
+      (item) =>
+        item.name.toLowerCase().includes(keyword) ||
+        item.description.toLowerCase().includes(keyword),
+    );
+
+    if (category) {
+      inventories = inventories.filter((item) => item.category === category);
+    }
+  }
+
+  res.json(inventories);
+};
+
+/* -------------------------- get inventory masing2 ------------------------- */
+export const getInventoryById = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  // ubah ke number dlu karena pas pertama kali dapetnya dalam bentuk string
+  const inventories = await readData();
+
+  const item = inventories.find(
+    (item) => item.id === id && item.deletedAt === null,
+  );
+
+  if (!item) {
+    return res.status(404).json({ message: "Item not found" });
+  }
+  res.json(item);
+};
+
+/* --------------------------------- update --------------------------------- */
+
+export const updateInventory = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+
+  const inventories = await readData();
+
+  const index = inventories.findIndex(
+    (item) => item.id === id && item.deletedAt === null,
+  );
+
+  if (index === -1) {
+    return res.status(404).json({ message: "Item not found" });
+  }
+
+  const updateItem = {
+    ...inventories[index],
+    ...req.body,
+    updatedAt: new Date().toISOString,
+  };
+
+  inventories[index] = updateItem;
+
+  writeData(inventories);
+
+  res.json(updateItem);
+};
+
+/* --------------------------------- delete --------------------------------- */
+
+export const deleteInventory = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+
+  const inventories = await readData();
+
+  const index = inventories.findIndex(
+    (item) => item.id === id && item.deletedAt === null,
+  );
+
+  if (index === -1) {
+    return res.status(404).json({ message: "Item not found" });
+  }
+  inventories[index]!.deletedAt = new Date().toISOString();
+
+  writeData(inventories);
+
+  res.json({ message: "Item soft deleted" });
+};
