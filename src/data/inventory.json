@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "MacBook Pro M3",
+    "description": "14-inch laptop for development team",
+    "category": "Electronics",
+    "stock": 5,
+    "createdAt": "2026-03-04T10:00:00.000Z",
+    "updatedAt": null,
+    "deletedAt": null
+  },
+  {
+    "id": 2,
+    "name": "Ergonomic Chair",
+    "description": "Adjustable office chair with lumbar support",
+    "category": "Furniture",
+    "stock": 12,
+    "createdAt": "2026-03-04T10:00:00.000Z",
+    "updatedAt": null,
+    "deletedAt": null
+  },
+  {
+    "id": 3,
+    "name": "Epson Projector",
+    "description": "Full HD meeting room projector",
+    "category": "Electronics",
+    "stock": 2,
+    "createdAt": "2026-03-04T10:00:00.000Z",
+    "updatedAt": null,
+    "deletedAt": null
+  }
+]
